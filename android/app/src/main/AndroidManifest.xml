@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.mujhtech.devfest">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="Devfest 2022"
         android:name="${applicationName}"

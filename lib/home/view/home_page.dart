@@ -1,9 +1,9 @@
-import 'dart:ui';
-
 import 'package:devfest/app/app.dart';
 import 'package:devfest/home/view/camera_page.dart';
+import 'package:devfest/home/view/devfest_page.dart';
 import 'package:devfest/home/view/note_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +16,11 @@ class _HomePageState extends State<HomePage> {
   int _page = 1;
   final GlobalKey bottomNavigationKey = GlobalKey();
 
-  final List<Widget> screens = [const CameraPage(), const NotePage()];
+  final List<Widget> screens = [
+    const NotePage(),
+    const CameraPage(),
+    const DevfestPage()
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,44 +33,77 @@ class _HomePageState extends State<HomePage> {
           child: screens[_page],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Container(
-          color: Colors.transparent,
-          child: ClipRRect(
-             borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: BottomNavigationBar(
-                key: bottomNavigationKey,
-                showSelectedLabels: true,
-                showUnselectedLabels: true,
-                selectedFontSize: 12,
-                unselectedFontSize: 12,
-                selectedLabelStyle:
-                    Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 12),
-                unselectedLabelStyle:
-                    Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 12),
-                type: BottomNavigationBarType.fixed,
-                currentIndex: _page,
-                onTap: (int value) {
-                  _page = value;
-                  setState(() {});
-                },
-                iconSize: 18,
-                backgroundColor: AppColor.primary4.withOpacity(.2),
-                selectedItemColor: Theme.of(context).iconTheme.color,
-                unselectedItemColor: Theme.of(context).textTheme.bodyText1!.color,
-                items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.photo_camera), label: 'Selfies'),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.description), label: 'Notes'),
-                ],
+      bottomNavigationBar: BottomNavigationBar(
+        key: bottomNavigationKey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        elevation: 5,
+        selectedLabelStyle:
+            Theme.of(context).textTheme.headline4!.copyWith(fontSize: 12),
+        unselectedLabelStyle:
+            Theme.of(context).textTheme.headline4!.copyWith(fontSize: 12),
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _page,
+        onTap: (int value) {
+          _page = value;
+          setState(() {});
+        },
+        iconSize: 18,
+        backgroundColor: Theme.of(context).bottomAppBarTheme.color,
+        selectedItemColor: Theme.of(context).iconTheme.color,
+        unselectedItemColor: Theme.of(context).textTheme.bodyText1!.color,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Container(
+                  height: 35,
+                  width: 35,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          width: 2, color: Theme.of(context).iconTheme.color!)),
+                  child: Icon(
+                    Icons.description,
+                    size: 20,
+                    color: Theme.of(context).iconTheme.color,
+                  )),
+              label: 'Notes'),
+          BottomNavigationBarItem(
+              icon: Container(
+                  height: 35,
+                  width: 35,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          width: 2, color: Theme.of(context).iconTheme.color!)),
+                  child: Icon(
+                    Icons.photo_camera,
+                    size: 20,
+                    color: Theme.of(context).iconTheme.color,
+                  )),
+              label: 'Snap'),
+          BottomNavigationBarItem(
+            icon: Container(
+              height: 35,
+              width: 35,
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      width: 2, color: Theme.of(context).iconTheme.color!)),
+              child: SvgPicture.asset(
+                AppVector.developersLogo,
+                width: 20,
+                height: 20,
+                semanticsLabel: AppString.devfest,
               ),
             ),
+            label: AppString.devfest,
           ),
-        ),
+        ],
       ),
     );
   }
