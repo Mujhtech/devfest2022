@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:devfest/app/app_color.dart';
 import 'package:devfest/extensions/screen.dart';
+import 'package:devfest/home/widgets/thumbnail_card.dart';
+import 'package:devfest/home/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:video_player/video_player.dart';
 
 T? _ambiguate<T>(T? value) => value;
@@ -46,24 +47,6 @@ class _CameraPageState extends State<CameraPage>
 
   init() async {
     _cameras = await availableCameras();
-    // controller = CameraController(_cameras[0], ResolutionPreset.max);
-    // controller.initialize().then((_) {
-    //   if (!mounted) {
-    //     return;
-    //   }
-    //   setState(() {});
-    // }).catchError((Object e) {
-    //   if (e is CameraException) {
-    //     switch (e.code) {
-    //       case 'CameraAccessDenied':
-    //         print('User denied camera access.');
-    //         break;
-    //       default:
-    //         print('Handle other errors.');
-    //         break;
-    //     }
-    //   }
-    // });
     _ambiguate(WidgetsBinding.instance)?.addObserver(this);
 
     _flashModeControlRowAnimationController = AnimationController(
@@ -90,6 +73,7 @@ class _CameraPageState extends State<CameraPage>
       parent: _focusModeControlRowAnimationController,
       curve: Curves.easeInCubic,
     );
+    setState(() {});
   }
 
   @override
@@ -124,20 +108,6 @@ class _CameraPageState extends State<CameraPage>
     }
   }
 
-  /// Returns a suitable camera icon for [direction].
-  IconData getCameraLensIcon(CameraLensDirection direction) {
-    switch (direction) {
-      case CameraLensDirection.back:
-        return Icons.camera_rear;
-      case CameraLensDirection.front:
-        return Icons.camera_front;
-      case CameraLensDirection.external:
-        return Icons.camera;
-      default:
-        throw ArgumentError('Unknown lens direction');
-    }
-  }
-
   void _logError(String code, String? message) {
     if (message != null) {
       print('Error: $code\nError Message: $message');
@@ -151,7 +121,15 @@ class _CameraPageState extends State<CameraPage>
     return Stack(
       children: <Widget>[
         SizedBox(
-            height: context.screenHeight(1), child: _cameraPreviewWidget()),
+            height: context.screenHeight(1),
+            child: CameraPreviewWidget(
+              decrementPointer: () => _pointers--,
+              incrementPointer: () => _pointers++,
+              controller: controller,
+              handleScaleStart: _handleScaleStart,
+              handleScaleUpdate: _handleScaleUpdate,
+              onViewFinderTap: (p0, p1) => onViewFinderTap(p0, p1),
+            )),
         Align(
           alignment: Alignment.topRight,
           child: Container(
@@ -165,7 +143,10 @@ class _CameraPageState extends State<CameraPage>
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _cameraTogglesRowWidget(),
+                CameraToggle(
+                    controller: controller,
+                    onPressed: (value) => onNewCameraSelected(value),
+                    cameras: _cameras)
               ],
             ),
           ),
@@ -176,7 +157,9 @@ class _CameraPageState extends State<CameraPage>
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _thumbnailWidget(),
+              ThumbnailCard(
+                imageFile: imageFile,
+              ),
               IconButton(
                 icon: const Icon(Icons.radio_button_unchecked),
                 color: AppColor.white,
@@ -238,33 +221,6 @@ class _CameraPageState extends State<CameraPage>
     );
   }
 
-  /// Display the preview from the camera (or a message if the preview is not available).
-  Widget _cameraPreviewWidget() {
-    final CameraController? cameraController = controller;
-
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return Text('Tap a camera', style: Theme.of(context).textTheme.headline2);
-    } else {
-      return Listener(
-        onPointerDown: (_) => _pointers++,
-        onPointerUp: (_) => _pointers--,
-        child: CameraPreview(
-          controller!,
-          child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onScaleStart: _handleScaleStart,
-              onScaleUpdate: _handleScaleUpdate,
-              onTapDown: (TapDownDetails details) =>
-                  onViewFinderTap(details, constraints),
-            );
-          }),
-        ),
-      );
-    }
-  }
-
   void _handleScaleStart(ScaleStartDetails details) {
     _baseScale = _currentScale;
   }
@@ -279,56 +235,6 @@ class _CameraPageState extends State<CameraPage>
         .clamp(_minAvailableZoom, _maxAvailableZoom);
 
     await controller!.setZoomLevel(_currentScale);
-  }
-
-  /// Display the thumbnail of the captured image or video.
-  Widget _thumbnailWidget() {
-    final VideoPlayerController? localVideoController = videoController;
-
-    return Row(
-      //mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (localVideoController == null && imageFile == null)
-          Container()
-        else
-          Container(
-            width: 50.0,
-            height: 50.0,
-            padding: const EdgeInsets.all(0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(width: 2, color: AppColor.white)),
-            child: (localVideoController == null)
-                ? (
-                    // The captured image on the web contains a network-accessible URL
-                    // pointing to a location within the browser. It may be displayed
-                    // either with Image.network or Image.memory after loading the image
-                    // bytes to memory.
-                    kIsWeb
-                        ? Image.network(
-                            imageFile!.path,
-                            width: 50.0,
-                            height: 50.0,
-                          )
-                        : Image.file(
-                            File(imageFile!.path),
-                            width: 50.0,
-                            height: 50.0,
-                          ))
-                : Container(
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.pink)),
-                    child: Center(
-                      child: AspectRatio(
-                          aspectRatio: localVideoController.value.size != null
-                              ? localVideoController.value.aspectRatio
-                              : 1.0,
-                          child: VideoPlayer(localVideoController)),
-                    ),
-                  ),
-          ),
-      ],
-    );
   }
 
   /// Display a bar with buttons to change the flash and exposure modes
@@ -576,52 +482,6 @@ class _CameraPageState extends State<CameraPage>
         ),
       ),
     );
-  }
-
-  /// Display a row of toggle to select the camera (or a message if no camera is available).
-  Widget _cameraTogglesRowWidget() {
-    final List<Widget> toggles = <Widget>[];
-
-    void onChanged(CameraDescription? description) {
-      if (description == null) {
-        return;
-      }
-
-      onNewCameraSelected(description);
-    }
-
-    if (_cameras.isEmpty) {
-      _ambiguate(SchedulerBinding.instance)?.addPostFrameCallback((_) async {
-        showInSnackBar('No camera found.');
-      });
-      return const Text('None');
-    } else {
-      for (final CameraDescription cameraDescription in _cameras) {
-        toggles.add(IconButton(
-            icon: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
-            color: controller?.description == cameraDescription
-                ? AppColor.primary3
-                : AppColor.white,
-            onPressed: () {
-              controller != null && controller!.value.isRecordingVideo
-                  ? null
-                  : onChanged(cameraDescription);
-            }));
-        //   RadioListTile<CameraDescription>(
-        //     title:
-        //     groupValue: controller?.description,
-        //     value: cameraDescription,
-        //     onChanged:
-
-        //   ),
-        // );
-      }
-    }
-
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: toggles);
   }
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
