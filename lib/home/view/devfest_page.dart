@@ -1,6 +1,7 @@
 import 'package:devfest/app/app.dart';
 import 'package:devfest/common/common.dart';
 import 'package:devfest/data/data.dart';
+import 'package:devfest/data/product_list.dart';
 import 'package:devfest/home/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -61,6 +62,34 @@ class DevfestPage extends StatelessWidget {
         ),
         const Height20(),
         Text(
+          'Area of topic from Devfest speakers',
+          style: Theme.of(context)
+              .textTheme
+              .headline4!
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
+        GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(top: 10, bottom: 20, left: 5),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 100 / 100,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            shrinkWrap: true,
+            //clipBehavior: Clip.none,
+            itemBuilder: (context, index) {
+              final product = productLists[index];
+              return ProductCard(
+                key: Key(product.toString()),
+                product: product,
+                index: index,
+              );
+            },
+            itemCount: productLists.length),
+        const Height20(),
+        Text(
           'Find GDG near you',
           style: Theme.of(context)
               .textTheme
@@ -69,7 +98,7 @@ class DevfestPage extends StatelessWidget {
         ),
         GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(top: 10, bottom: 20),
+            padding: const EdgeInsets.only(top: 10, bottom: 20, left: 5),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               childAspectRatio: 100 / 100,

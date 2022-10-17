@@ -7,5 +7,6 @@ class AppColor {
   static const Color primary3 = Color(0xFF079C56);
   static const Color primary4 = Color(0xFFFABC05);
   static const Color white = Colors.white;
+  static const Color black = Colors.black;
   static const Color transparent = Colors.transparent;
 }

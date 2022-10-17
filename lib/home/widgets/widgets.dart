@@ -1,3 +1,2 @@
 export 'gdg_card.dart';
-export 'camera_toggle.dart';
-export 'camera_preview.dart';
+export 'product_card.dart';

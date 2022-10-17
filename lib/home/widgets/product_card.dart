@@ -1,14 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:devfest/app/app.dart';
 import 'package:devfest/common/common.dart';
 import 'package:devfest/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-class GDGCard extends StatelessWidget {
-  final GDGModel gdg;
+class ProductCard extends StatelessWidget {
+  final ProductModel product;
   final int index;
-  const GDGCard({super.key, required this.gdg, required this.index});
+  const ProductCard({super.key, required this.product, required this.index});
 
   Color backgroundColor() {
     if (index % 4 == 0) {
@@ -25,14 +25,14 @@ class GDGCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => showCupertinoModalBottomSheet(
-          context: context,
-          elevation: 0,
-          expand: true,
-          shadow: const BoxShadow(color: Colors.transparent),
-          backgroundColor: Colors.transparent,
-          transitionBackgroundColor: Colors.transparent,
-          builder: (context) => GDGModal(gdg: gdg)),
+      // onTap: () => showCupertinoModalBottomSheet(
+      //     context: context,
+      //     elevation: 0,
+      //     expand: true,
+      //     shadow: const BoxShadow(color: Colors.transparent),
+      //     backgroundColor: Colors.transparent,
+      //     transitionBackgroundColor: Colors.transparent,
+      //     builder: (context) => GDGModal(gdg: gdg)),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -66,10 +66,32 @@ class GDGCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(AppVector.developersLogo,
-                      width: 50, height: 50, semanticsLabel: AppString.devfest),
+                  if (product.image != null && product.image!.contains('.svg'))
+                    SvgPicture.network(
+                      product.image!,
+                      width: 30,
+                      height: 30,
+                    )
+                  else
+                    CachedNetworkImage(
+                      imageUrl: product.image!,
+                      imageBuilder: (context, imageProvider) => Image(
+                        image: imageProvider,
+                        width: 30,
+                        height: 30,
+                      ),
+                      placeholder: (context, url) => BrokenImage(
+                        size: 25,
+                        color: backgroundColor(),
+                      ),
+                      errorWidget: (context, url, error) => BrokenImage(
+                        size: 25,
+                        color: backgroundColor(),
+                      ),
+                    ),
                   Text(
-                    gdg.name,
+                    product.name,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headline6!.copyWith(
                         fontWeight: FontWeight.w900, color: AppColor.black),
                   )
