@@ -1,7 +1,7 @@
 import 'package:devfest/app/app.dart';
-import 'package:devfest/home/view/camera_page.dart';
+import 'package:devfest/camera/camera.dart';
 import 'package:devfest/home/view/devfest_page.dart';
-import 'package:devfest/home/view/note_page.dart';
+import 'package:devfest/note/note.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

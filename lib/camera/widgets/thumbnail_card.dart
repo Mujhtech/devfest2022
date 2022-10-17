@@ -48,7 +48,7 @@ class ThumbnailCard extends StatelessWidget {
                         BoxDecoration(border: Border.all(color: Colors.pink)),
                     child: Center(
                       child: AspectRatio(
-                          aspectRatio: localVideoController!.value.size != null
+                          aspectRatio: localVideoController != null
                               ? localVideoController!.value.aspectRatio
                               : 1.0,
                           child: VideoPlayer(localVideoController!)),

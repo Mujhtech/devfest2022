@@ -2,26 +2,39 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:devfest/app/app_color.dart';
+import 'package:devfest/camera/bloc/camera_bloc.dart';
 import 'package:devfest/extensions/screen.dart';
-import 'package:devfest/home/widgets/thumbnail_card.dart';
-import 'package:devfest/home/widgets/widgets.dart';
+import 'package:devfest/camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 
 T? _ambiguate<T>(T? value) => value;
 
-class CameraPage extends StatefulWidget {
+class CameraPage extends StatelessWidget {
   const CameraPage({super.key});
 
   @override
-  State<CameraPage> createState() => _CameraPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+        create: (context) {
+          return CameraBloc()..add(const CameraInitiated());
+        },
+        child: const CameraView());
+  }
 }
 
-class _CameraPageState extends State<CameraPage>
+class CameraView extends StatefulWidget {
+  const CameraView({super.key});
+
+  @override
+  State<CameraView> createState() => _CameraViewState();
+}
+
+class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? controller;
-  late List<CameraDescription> _cameras;
 
   XFile? imageFile;
   XFile? videoFile;
@@ -46,7 +59,6 @@ class _CameraPageState extends State<CameraPage>
   int _pointers = 0;
 
   init() async {
-    _cameras = await availableCameras();
     _ambiguate(WidgetsBinding.instance)?.addObserver(this);
 
     _flashModeControlRowAnimationController = AnimationController(
@@ -84,7 +96,7 @@ class _CameraPageState extends State<CameraPage>
 
   @override
   void dispose() {
-    controller!.dispose();
+    controller?.dispose();
     _ambiguate(WidgetsBinding.instance)?.removeObserver(this);
     _flashModeControlRowAnimationController.dispose();
     _exposureModeControlRowAnimationController.dispose();
@@ -118,6 +130,7 @@ class _CameraPageState extends State<CameraPage>
 
   @override
   Widget build(BuildContext context) {
+    final cameraBloc = context.select((CameraBloc bloc) => bloc.state);
     return Stack(
       children: <Widget>[
         SizedBox(
@@ -146,20 +159,25 @@ class _CameraPageState extends State<CameraPage>
                 CameraToggle(
                     controller: controller,
                     onPressed: (value) => onNewCameraSelected(value),
-                    cameras: _cameras)
+                    cameras: cameraBloc.cameras)
               ],
             ),
           ),
         ),
-        Align(
-          alignment: Alignment.bottomCenter,
+        Positioned(
+          bottom: 0,
+          left: imageFile != null ? 0 : 50,
+          right: 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ThumbnailCard(
-                imageFile: imageFile,
-              ),
+              if (imageFile != null)
+                ThumbnailCard(
+                  imageFile: imageFile,
+                )
+              else
+                Container(),
               IconButton(
                 icon: const Icon(Icons.radio_button_unchecked),
                 color: AppColor.white,

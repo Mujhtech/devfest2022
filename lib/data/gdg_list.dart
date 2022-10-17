@@ -5,7 +5,7 @@ final gdgLists = [
   GDGModel(name: 'GDG Minna', url: 'https://gdg.community.dev/gdg-minna'),
   GDGModel(name: 'GDG Abuja', url: 'https://gdg.community.dev/gdg-abuja'),
   GDGModel(name: 'GDG Ibadan', url: 'https://gdg.community.dev/gdg-ibadan'),
-  GDGModel(name: 'GDG Lagos', url: 'https://gdg.community.dev/gdg-lagos'),
+  GDGModel(name: 'GDG Bida', url: 'https://gdg.community.dev/gdg-bida'),
   GDGModel(name: 'GDG Accra', url: 'https://gdg.community.dev/gdg-accra'),
   GDGModel(name: 'GDG Abeokuta', url: 'https://gdg.community.dev/gdg-abeokuta'),
   GDGModel(name: 'GDG Aja', url: 'https://gdg.community.dev/gdg-aja'),
