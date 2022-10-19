@@ -5,3 +5,4 @@ export 'widgets/rounded_container.dart';
 export 'modals/modals.dart';
 export 'widgets/broken_image.dart';
 export 'widgets/snackbar.dart';
+export 'widgets/drag_resizable.dart';

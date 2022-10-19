@@ -7,6 +7,10 @@ abstract class AppThemeEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class AppDataCreated extends AppThemeEvent {
+  const AppDataCreated();
+}
+
 class AppThemeChanged extends AppThemeEvent {
   const AppThemeChanged({required this.theme});
 
@@ -14,4 +18,13 @@ class AppThemeChanged extends AppThemeEvent {
 
   @override
   List<Object> get props => [theme];
+}
+
+class NoteLayoutChanged extends AppThemeEvent {
+  const NoteLayoutChanged({required this.layout});
+
+  final NoteDispayLayout layout;
+
+  @override
+  List<Object> get props => [layout];
 }

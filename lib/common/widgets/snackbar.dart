@@ -35,9 +35,11 @@ class CustomSnackBar extends StatelessWidget {
               children: [
                 if (snackbarModel.title != null)
                   Text(snackbarModel.title!,
-                      style: Theme.of(context).textTheme.headline1),
+                      style: Theme.of(context).textTheme.headline1!.copyWith(
+                          color: AppColor.white, fontWeight: FontWeight.w600)),
                 Text(snackbarModel.message,
-                    style: Theme.of(context).textTheme.bodyText1),
+                    style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                        color: AppColor.white, fontWeight: FontWeight.w600)),
               ],
             ),
           ),

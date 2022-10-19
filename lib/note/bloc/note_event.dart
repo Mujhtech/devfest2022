@@ -8,7 +8,8 @@ abstract class NoteEvent extends Equatable {
 }
 
 class NoteRefreshed extends NoteEvent {
-  const NoteRefreshed();
+  final bool refresh;
+  const NoteRefreshed({this.refresh = false});
 }
 
 class NoteCreated extends NoteEvent {
@@ -16,10 +17,11 @@ class NoteCreated extends NoteEvent {
   const NoteCreated({required this.note});
 }
 
-class NoteUpdated extends NoteEvent {
-  const NoteUpdated();
+class NoteDeleted extends NoteEvent {
+  final NotesModel note;
+  const NoteDeleted({required this.note});
 }
 
-class NoteDeleted extends NoteEvent {
-  const NoteDeleted();
+class NoteUpdated extends NoteEvent {
+  const NoteUpdated();
 }

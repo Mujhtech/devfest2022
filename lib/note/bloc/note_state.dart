@@ -10,15 +10,15 @@ extension NoteStatusX on NoteStatus {
 
 class NoteState extends Equatable {
   final NoteStatus status;
-  final List<NotesModel> notes;
+  final List<NotesModel>? notes;
 
   const NoteState({
-    required this.notes,
+    this.notes,
     this.status = NoteStatus.initial,
   });
 
   @override
-  List<Object> get props => [status, notes];
+  List<Object?> get props => [status, notes];
 
   NoteState copyWith({
     NoteStatus? status,

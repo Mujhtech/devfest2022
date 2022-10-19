@@ -1,3 +1,4 @@
+import 'package:devfest/app/app.dart';
 import 'package:devfest/data/models/notes_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -16,12 +17,16 @@ class HiveService {
     await noteBox.clear();
   }
 
-  Future<void> setTheme(ThemeMode themeOption) async {
-    return appDataBox.put('theme', themeOption.name);
+  Future<void> setAppData(String key, dynamic value) async {
+    return appDataBox.put(key, value);
   }
 
   Future<void> insert(NotesModel note) async {
     return noteBox.put(note.id, note.toMap());
+  }
+
+  Future<dynamic> getAppData(String key) {
+    return appDataBox.get(key, defaultValue: '');
   }
 
   Future<void> insertAll(List<NotesModel> checklists,

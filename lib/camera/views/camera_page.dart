@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:devfest/app/app_color.dart';
 import 'package:devfest/camera/bloc/camera_bloc.dart';
+import 'package:devfest/core/interface/interface.dart';
 import 'package:devfest/extensions/screen.dart';
 import 'package:devfest/camera/camera.dart';
+import 'package:devfest/preview/preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,11 +19,12 @@ class CameraPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) {
-          return CameraBloc()..add(const CameraInitiated());
-        },
-        child: const CameraView());
+    return const CameraView();
+    // return BlocProvider(
+    //     create: (context) {
+    //       return CameraBloc()..add(const CameraInitiated());
+    //     },
+    //     child: const CameraView());
   }
 }
 
@@ -85,7 +88,14 @@ class _CameraViewState extends State<CameraView>
       parent: _focusModeControlRowAnimationController,
       curve: Curves.easeInCubic,
     );
+
     setState(() {});
+
+    final systemCam = context.read<CameraBloc>().state.cameras;
+
+    if (systemCam.isNotEmpty) {
+      onNewCameraSelected(systemCam.last);
+    }
   }
 
   @override
@@ -106,17 +116,15 @@ class _CameraViewState extends State<CameraView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = controller;
-
     // App state changed before we got the chance to initialize.
-    if (cameraController == null || !cameraController.value.isInitialized) {
+    if (controller == null || !controller!.value.isInitialized) {
       return;
     }
 
     if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
+      controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      onNewCameraSelected(cameraController.description);
+      onNewCameraSelected(controller!.description);
     }
   }
 
@@ -131,7 +139,13 @@ class _CameraViewState extends State<CameraView>
   @override
   Widget build(BuildContext context) {
     final cameraBloc = context.select((CameraBloc bloc) => bloc.state);
+
+    final orientation = MediaQuery.of(context).orientation;
+    final aspectRatio = orientation == Orientation.portrait
+        ? CameraAspectRatio.portrait
+        : CameraAspectRatio.landscape;
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         SizedBox(
             height: context.screenHeight(1),
@@ -179,15 +193,16 @@ class _CameraViewState extends State<CameraView>
               else
                 Container(),
               IconButton(
-                icon: const Icon(Icons.radio_button_unchecked),
-                color: AppColor.white,
-                iconSize: 100,
-                onPressed: controller != null &&
+                  icon: const Icon(Icons.radio_button_unchecked),
+                  color: AppColor.white,
+                  iconSize: 100,
+                  onPressed: () {
+                    if (controller != null &&
                         controller!.value.isInitialized &&
-                        !controller!.value.isRecordingVideo
-                    ? onTakePictureButtonPressed
-                    : null,
-              ),
+                        !controller!.value.isRecordingVideo) {
+                      onTakePictureButtonPressed(aspectRatio);
+                    }
+                  }),
               IconButton(
                 icon: const Icon(Icons.videocam),
                 color: Colors.blue,
@@ -611,7 +626,7 @@ class _CameraViewState extends State<CameraView>
     }
   }
 
-  void onTakePictureButtonPressed() {
+  void onTakePictureButtonPressed(double aspectRatio) {
     takePicture().then((XFile? file) {
       if (mounted) {
         setState(() {
@@ -620,7 +635,12 @@ class _CameraViewState extends State<CameraView>
           videoController = null;
         });
         if (file != null) {
-          showInSnackBar('Picture saved to ${file.path}');
+          context
+              .read<CameraBloc>()
+              .add(CameraCaptured(aspectRatio: aspectRatio, image: file));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const PreviewPage()));
+          //showInSnackBar('Picture saved to ${file.path}');
         }
       }
     });

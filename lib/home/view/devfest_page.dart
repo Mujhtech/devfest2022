@@ -116,6 +116,16 @@ class DevfestPage extends StatelessWidget {
               );
             },
             itemCount: gdgLists.length),
+        const Height20(),
+        Center(
+          child: Text(
+            'Built with 💙 for developers.',
+            style: Theme.of(context)
+                .textTheme
+                .headline4!
+                .copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
       ],
     );
   }

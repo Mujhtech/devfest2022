@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1058461742051",
+    "project_id": "devfest2022-cb2a3",
+    "storage_bucket": "devfest2022-cb2a3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058461742051:android:6f8101c8259f2e4530a6d6",
+        "android_client_info": {
+          "package_name": "app.mujhtech.devfest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1058461742051-mtp1avb50g4cok3grvdp3v677thg7vcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiYIfqhgWUyXGGmiEAOgZuuuu7fI-HM0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1058461742051-mtp1avb50g4cok3grvdp3v677thg7vcs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

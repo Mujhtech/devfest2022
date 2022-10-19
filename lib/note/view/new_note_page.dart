@@ -40,6 +40,7 @@ class _NewNoteViewState extends State<NewNoteView> {
   final focusNode = FocusNode();
   String? noteId;
   final debounce = Debounce(delayInMilliseconds: 1000);
+  bool hasFocus = false;
 
   @override
   void initState() {
@@ -50,6 +51,20 @@ class _NewNoteViewState extends State<NewNoteView> {
       noteId = widget.note!.id;
       note = TextEditingController(text: widget.note?.note);
     }
+    focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    focusNode.removeListener(_onFocusChange);
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  _onFocusChange() {
+    setState(() {
+      hasFocus = focusNode.hasFocus;
+    });
   }
 
   @override
@@ -68,7 +83,7 @@ class _NewNoteViewState extends State<NewNoteView> {
                     style: Theme.of(context).textTheme.headline4,
                   ),
                   SizedBox(
-                    height: context.screenHeight(0.9),
+                    height: context.screenHeight(hasFocus ? 0.9 : 0.6),
                     child: TextFormField(
                       focusNode: focusNode,
                       controller: note,

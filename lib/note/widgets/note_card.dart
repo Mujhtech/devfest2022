@@ -20,11 +20,11 @@ class NoteCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-            color: Theme.of(context).iconTheme.color!.withOpacity(0.2),
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.05),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
                 width: 2,
-                color: Theme.of(context).iconTheme.color!.withOpacity(0.5))),
+                color: Theme.of(context).iconTheme.color!.withOpacity(0.1))),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

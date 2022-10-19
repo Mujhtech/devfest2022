@@ -1,22 +1,19 @@
 part of 'app_theme_bloc.dart';
 
-class AppThemeState extends Equatable {
-  const AppThemeState({
-    this.theme = ThemeMode.system,
-  });
+enum NoteDispayLayout { grid, column }
+
+class AppDataTheme extends Equatable {
+  const AppDataTheme(
+      {this.theme = ThemeMode.system, this.layout = NoteDispayLayout.grid});
 
   final ThemeMode theme;
+  final NoteDispayLayout layout;
 
   @override
-  List<Object?> get props => [
-        theme,
-      ];
+  List<Object?> get props => [theme, layout];
 
-  AppThemeState copyWith({
-    ThemeMode? theme,
-  }) {
-    return AppThemeState(
-      theme: theme ?? this.theme,
-    );
+  AppDataTheme copyWith({ThemeMode? theme, NoteDispayLayout? layout}) {
+    return AppDataTheme(
+        theme: theme ?? this.theme, layout: layout ?? this.layout);
   }
 }

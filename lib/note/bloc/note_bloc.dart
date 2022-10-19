@@ -12,9 +12,10 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
       required SnackBarService snackBarService})
       : _noteService = noteService,
         _snackBarService = snackBarService,
-        super(const NoteState(notes: [])) {
+        super(const NoteState()) {
     on<NoteCreated>(_createNote);
     on<NoteRefreshed>(_getAllNotes);
+    on<NoteDeleted>(_deleteNote);
   }
 
   final NoteService _noteService;
@@ -25,8 +26,10 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     Emitter<NoteState> emit,
   ) async {
     try {
-      final notes = await _noteService.all();
-      return emit(state.copyWith(status: NoteStatus.success, notes: notes));
+      if (event.refresh || state.notes == null) {
+        final notes = await _noteService.all();
+        return emit(state.copyWith(status: NoteStatus.success, notes: notes));
+      }
     } catch (e) {
       //
       return emit(state.copyWith(status: NoteStatus.failure));
@@ -40,10 +43,25 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     try {
       final notes = await _noteService.update(event.note);
       if (notes) {
-        add(const NoteRefreshed());
+        add(const NoteRefreshed(refresh: true));
       }
       _snackBarService.displayMessage('Saved', status: Status.success);
-      return emit(state.copyWith(status: NoteStatus.loading));
+    } catch (e) {
+      //
+      return emit(state.copyWith(status: NoteStatus.failure));
+    }
+  }
+
+  Future<void> _deleteNote(
+    NoteDeleted event,
+    Emitter<NoteState> emit,
+  ) async {
+    try {
+      final notes = await _noteService.delete([event.note]);
+      if (notes) {
+        add(const NoteRefreshed());
+      }
+      _snackBarService.displayMessage('Note Deleted', status: Status.success);
     } catch (e) {
       //
       return emit(state.copyWith(status: NoteStatus.failure));
