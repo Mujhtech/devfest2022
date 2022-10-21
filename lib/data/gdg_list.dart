@@ -11,4 +11,7 @@ final gdgLists = [
   GDGModel(name: 'GDG Aja', url: 'https://gdg.community.dev/gdg-aja'),
   GDGModel(name: 'GDG Kano', url: 'https://gdg.community.dev/gdg-kano'),
   GDGModel(name: 'GDG Kaduna', url: 'https://gdg.community.dev/gdg-kaduna')
+  GDGModel(name: 'GDG Ghardaia', url: 'https://gdg.community.dev/gdg-ghardaia'),
+  GDGModel(name:'GDG Agadir', url: 'https://gdg.community.dev/gdg-agadir'),
+  GDGModel(name: 'GDG Mpape', url: 'https://gdg.community.dev/gdg-mpape'),
 ];
