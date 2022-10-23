@@ -1,26 +1,72 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:github_sign_in/github_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:devfest/models/models.dart' as model;
+import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:devfest/core/interface/interface.dart';
+class AuthenticationRepository {
+  AuthenticationRepository({
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    GoogleSignIn? googleSignIn,
+  })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
+        _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
 
-class AuthService implements AuthInterface {
-  Future<UserCredential> signInWithGitHub(BuildContext context) async {
-    // Create a GitHubSignIn instance
-    final GitHubSignIn gitHubSignIn = GitHubSignIn(
-        clientId: 'c93b4dddb59a3af396b9',
-        clientSecret: '0866c430f8cb5f30951bfbcdeebde568ec4f2fbe',
-        redirectUrl:
-            'https://devfest2022-cb2a3.firebaseapp.com/__/auth/handler');
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final GoogleSignIn _googleSignIn;
 
-    // Trigger the sign-in flow
-    final result = await gitHubSignIn.signIn(context);
+  Stream<model.User> get user {
+    return _firebaseAuth.authStateChanges().map((firebaseUser) {
+      final user =
+          firebaseUser == null ? model.User.empty : firebaseUser.toUser;
+      return user;
+    });
+  }
 
-    // Create a credential from the access token
-    final githubAuthCredential = GithubAuthProvider.credential(result.token);
+  Future<void> logInWithGithub(BuildContext context) async {
+    try {
+      late final firebase_auth.AuthCredential credential;
+      if (kIsWeb) {
+        final googleProvider = firebase_auth.GoogleAuthProvider();
+        final userCredential = await _firebaseAuth.signInWithPopup(
+          googleProvider,
+        );
+        credential = userCredential.credential!;
+      } else {
+        final googleUser = await _googleSignIn.signIn();
+        final googleAuth = await googleUser!.authentication;
+        credential = firebase_auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+      }
 
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance
-        .signInWithCredential(githubAuthCredential);
+      await _firebaseAuth.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw e.code;
+    } catch (_) {
+      throw 'Error sign in';
+    }
+  }
+
+  /// Signs out the current user which will emit
+  /// [User.empty] from the [user] Stream.
+  ///
+  /// Throws a [LogOutFailure] if an exception occurs.
+  Future<void> logOut() async {
+    try {
+      await Future.wait([
+        _firebaseAuth.signOut(),
+      ]);
+    } catch (_) {
+      throw 'Failed to logout';
+    }
+  }
+}
+
+extension on firebase_auth.User {
+  model.User get toUser {
+    return model.User(
+        id: uid, email: email, name: displayName, photo: photoURL);
   }
 }

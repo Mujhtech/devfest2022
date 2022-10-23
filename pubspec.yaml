@@ -55,7 +55,8 @@ dependencies:
   firebase_auth: ^3.11.2
   cloud_firestore: ^3.5.1
   flame: ^1.4.0
-  github_sign_in: ^0.0.4
+  google_sign_in: ^5.4.2
+  firebase_storage: ^10.3.11
 
 dev_dependencies:
   flutter_test:

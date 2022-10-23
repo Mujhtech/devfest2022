@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:devfest/core/services/services.dart';
 import 'package:devfest/data/models/notes_model.dart';
@@ -15,11 +17,31 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         super(const NoteState()) {
     on<NoteCreated>(_createNote);
     on<NoteRefreshed>(_getAllNotes);
+    on<NoteSync>(_syncNotes);
     on<NoteDeleted>(_deleteNote);
   }
 
   final NoteService _noteService;
   final SnackBarService _snackBarService;
+
+  Future<void> _syncNotes(
+    NoteSync event,
+    Emitter<NoteState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(syncStatus: NoteSyncStatus.sync));
+      await _noteService.sync();
+      emit(state.copyWith(syncStatus: NoteSyncStatus.success));
+      _snackBarService.displayMessage('Sync successful',
+          status: Status.success);
+    } catch (e) {
+      //
+      log(e.toString());
+      emit(state.copyWith(syncStatus: NoteSyncStatus.failure));
+      _snackBarService.displayMessage('Sync failed', status: Status.failed);
+      //return emit(state.copyWith(status: NoteStatus.failure));
+    }
+  }
 
   Future<void> _getAllNotes(
     NoteRefreshed event,
@@ -67,25 +89,6 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
       return emit(state.copyWith(status: NoteStatus.failure));
     }
   }
-
-  // bool _isAppThemeChangedEvent(AppThemeEvent e) {
-  //   return e is PhotoCharacterDragged || e is PhotoStickerDragged;
-  // }
-
-  // bool _isNotDragEvent(PhotoboothEvent e) {
-  //   return e is! PhotoCharacterDragged && e is! PhotoStickerDragged;
-  // }
-
-  // @override
-  // Stream<Transition<AppThemeEvent, AppThemeState>> transformEvents(
-  //   Stream<AppThemeEvent> events,
-  //   TransitionFunction<AppThemeEvent, AppThemeState> transitionFn,
-  // ) {
-  //   return Rx.merge([
-  //     events.where(_isDragEvent).debounceTime(_debounceDuration),
-  //     events.where(_isNotDragEvent),
-  //   ]).asyncExpand(transitionFn);
-  // }
 
   @override
   void onEvent(NoteEvent event) {
