@@ -5,19 +5,22 @@ import 'package:flutter/material.dart';
 Future<T?> showAppDialog<T>({
   required BuildContext context,
   required Widget child,
+  double? height,
   bool barrierDismissible = true,
 }) =>
     showDialog<T>(
       context: context,
       barrierColor: AppColor.transparent,
       barrierDismissible: barrierDismissible,
-      builder: (context) => _AppDialog(child: child),
+      builder: (context) => _AppDialog(height: height, child: child),
     );
 
 class _AppDialog extends StatelessWidget {
-  const _AppDialog({Key? key, required this.child}) : super(key: key);
+  const _AppDialog({Key? key, required this.child, this.height})
+      : super(key: key);
 
   final Widget child;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +28,16 @@ class _AppDialog extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: Container(
         width: 900,
-        decoration: const BoxDecoration(
+        height: height,
+        decoration: BoxDecoration(
+          border:
+              Border.all(width: 2, color: Theme.of(context).iconTheme.color!),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColor.white,
-              AppColor.white,
+              Theme.of(context).backgroundColor,
+              Theme.of(context).backgroundColor,
             ],
           ),
         ),

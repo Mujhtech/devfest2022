@@ -4,7 +4,7 @@ import 'package:camera/camera.dart';
 
 class CameraToggle extends StatelessWidget {
   final CameraController? controller;
-  final Function(CameraDescription) onPressed;
+  final Function() onPressed;
   final List<CameraDescription> cameras;
   const CameraToggle(
       {super.key,
@@ -27,36 +27,16 @@ class CameraToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> toggles = <Widget>[];
-
-    if (cameras.isEmpty) {
-      return Container();
-    } else {
-      for (final CameraDescription cameraDescription in cameras) {
-        toggles.add(IconButton(
-            icon: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
-            color: controller?.description == cameraDescription
-                ? AppColor.primary3
-                : AppColor.white,
+    return controller != null
+        ? IconButton(
+            icon:
+                Icon(getCameraLensIcon(controller!.description.lensDirection)),
+            color: AppColor.white,
             onPressed: () {
               controller != null && controller!.value.isRecordingVideo
                   ? null
-                  : onPressed(cameraDescription);
-            }));
-        //   RadioListTile<CameraDescription>(
-        //     title:
-        //     groupValue: controller?.description,
-        //     value: cameraDescription,
-        //     onChanged:
-
-        //   ),
-        // );
-      }
-    }
-
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: toggles);
+                  : onPressed();
+            })
+        : Container();
   }
 }

@@ -25,3 +25,7 @@ class NoteDeleted extends NoteEvent {
 class NoteUpdated extends NoteEvent {
   const NoteUpdated();
 }
+
+class NoteSync extends NoteEvent {
+  const NoteSync();
+}

@@ -1,4 +1,5 @@
 import 'package:devfest/app/app.dart';
+import 'package:devfest/auth/bloc/auth_bloc.dart';
 import 'package:devfest/core/core.dart';
 import 'package:devfest/data/models/notes_model.dart';
 import 'package:devfest/extensions/extensions.dart';
@@ -14,15 +15,16 @@ class NewNotePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) {
-          return NoteBloc(
-              noteService: context.read<NoteService>(),
-              snackBarService: context.read<SnackBarService>());
-        },
-        child: NewNoteView(
-          note: note,
-        ));
+    return NewNoteView(
+      note: note,
+    );
+    // return BlocProvider(
+    //     create: (context) {
+    //       return NoteBloc(
+    //           noteService: context.read<NoteService>(),
+    //           snackBarService: context.read<SnackBarService>());
+    //     },
+    //     child: );
   }
 }
 
@@ -83,7 +85,7 @@ class _NewNoteViewState extends State<NewNoteView> {
                     style: Theme.of(context).textTheme.headline4,
                   ),
                   SizedBox(
-                    height: context.screenHeight(hasFocus ? 0.9 : 0.6),
+                    height: context.screenHeight(hasFocus ? 0.6 : 0.9),
                     child: TextFormField(
                       focusNode: focusNode,
                       controller: note,
@@ -96,7 +98,8 @@ class _NewNoteViewState extends State<NewNoteView> {
                         if (value.isNotEmpty) {
                           NotesModel note = NotesModel(
                               id: noteId!,
-                              userId: noteId!,
+                              userId: context.read<AuthBloc>().state.user?.id ??
+                                  noteId!,
                               note: value,
                               sync: SyncStatus.unpblish,
                               createdAt: DateTime.now(),

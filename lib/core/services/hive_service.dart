@@ -1,6 +1,4 @@
-import 'package:devfest/app/app.dart';
 import 'package:devfest/data/models/notes_model.dart';
-import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveService {
@@ -29,10 +27,10 @@ class HiveService {
     return appDataBox.get(key, defaultValue: '');
   }
 
-  Future<void> insertAll(List<NotesModel> checklists,
+  Future<void> insertAll(List<NotesModel> notes,
       {bool clearSync = true}) async {
     final Map<dynamic, dynamic> data = {};
-    for (var checklist in checklists) {
+    for (var checklist in notes) {
       data[checklist.id] = checklist.toMap();
     }
     await noteBox.clear();
@@ -47,5 +45,12 @@ class HiveService {
   Future<List<NotesModel>> allNote() async {
     final data = noteBox.values.toList();
     return data.map((e) => NotesModel.fromMap(e)).toList();
+  }
+
+  Future<List<NotesModel>> allUnplishNote() async {
+    final data = noteBox.values.toList();
+    final formattedData = data.map((e) => NotesModel.fromMap(e)).toList();
+
+    return formattedData.where((e) => e.sync == SyncStatus.unpblish).toList();
   }
 }

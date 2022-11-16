@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:devfest/app/app.dart';
 import 'package:devfest/camera/bloc/camera_bloc.dart';
 import 'package:devfest/common/widgets/secondary_button.dart';
+import 'package:devfest/core/core.dart';
 import 'package:devfest/extensions/extensions.dart';
 import 'package:devfest/preview/preview.dart';
 import 'package:devfest/preview/widgets/draggable_stickers.dart';
@@ -18,7 +19,8 @@ class PreviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => PreviewBloc(),
+      create: (_) =>
+          PreviewBloc(photosRepository: context.read<PhotosRepository>()),
       child: const PreviewView(),
     );
   }
@@ -118,16 +120,23 @@ class _PreviewViewState extends State<PreviewView> {
                   ),
                 ),
                 Container(
-                  height: 60,
+                  height: 60.4,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   color: AppColor.black,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<PreviewBloc>().add(PreviewShared(
+                                assets: state.stickers,
+                                aspectRatio: state.aspectRatio!,
+                                image: state.image!,
+                                imageId: state.imageId,
+                                isSharingEnabled: true));
+                          },
                           foregroundColor: AppColor.primary3,
                           foregroundBorderColor: AppColor.white,
                           backgroundBorderColor: AppColor.primary1,
@@ -141,7 +150,14 @@ class _PreviewViewState extends State<PreviewView> {
                           width: 100,
                           height: 40),
                       SecondaryButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<PreviewBloc>().add(PreviewSaved(
+                                assets: state.stickers,
+                                aspectRatio: state.aspectRatio!,
+                                image: state.image!,
+                                imageId: state.imageId,
+                                isSaveEnabled: true));
+                          },
                           icon: const Icon(
                             Icons.save_alt,
                             size: 20,

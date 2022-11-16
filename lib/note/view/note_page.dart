@@ -1,35 +1,80 @@
 import 'package:devfest/app/app.dart';
-import 'package:devfest/app/app_color.dart';
+import 'package:devfest/auth/bloc/auth_bloc.dart';
 import 'package:devfest/common/common.dart';
-import 'package:devfest/core/core.dart';
 import 'package:devfest/extensions/extensions.dart';
 import 'package:devfest/note/note.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'dart:math' as math;
 
 class NotePage extends StatelessWidget {
   const NotePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) {
-          return NoteBloc(
-            snackBarService: context.read<SnackBarService>(),
-            noteService: context.read<NoteService>(),
-          )..add(const NoteRefreshed());
-        },
-        child: const NoteView());
+    return const NoteView();
   }
 }
 
-class NoteView extends StatelessWidget {
+class NoteView extends StatefulWidget {
   const NoteView({super.key});
+
+  @override
+  State<NoteView> createState() => _NoteViewState();
+}
+
+class _NoteViewState extends State<NoteView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+        ..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget statusWidget(NoteSyncStatus status) {
+    if (status.isSyncing) {
+      return AnimatedBuilder(
+        animation: _controller,
+        builder: (_, child) {
+          return Transform.rotate(
+            angle: _controller.value * 2 * math.pi,
+            child: child,
+          );
+        },
+        child: Icon(
+          Icons.cloud_sync,
+          size: 16,
+          color: Theme.of(context).iconTheme.color,
+        ),
+      );
+    } else if (status.isSuccess) {
+      return const Icon(
+        Icons.cloud_done,
+        size: 16,
+        color: AppColor.primary3,
+      );
+    } else if (status.isFailure) {
+      return const Icon(Icons.sync_problem, size: 16, color: AppColor.primary2);
+    } else {
+      return Icon(
+        Icons.sync,
+        size: 16,
+        color: Theme.of(context).iconTheme.color,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final notes = context.watch<NoteBloc>().state.notes;
+    final syncStatus = context.watch<NoteBloc>().state.syncStatus;
     final layout = context.watch<AppDataBloc>().state.layout;
+    final user = context.watch<AuthBloc>().state.user;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       floatingActionButton: SecondaryButton(
@@ -58,6 +103,92 @@ class NoteView extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    if (user != null && user.photo != null) ...[
+                      GestureDetector(
+                        onTap: () {
+                          showAppDialog(
+                              context: context,
+                              height: 200,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SecondaryButton(
+                                      foregroundBorderColor: AppColor.primary2,
+                                      backgroundColor: AppColor.primary2,
+                                      onPressed: () async {
+                                        context
+                                            .read<AuthBloc>()
+                                            .add(AuthLogoutRequested());
+                                        Navigator.pop(context);
+                                      },
+                                      textColor: AppColor.primary2,
+                                      label: 'Logout',
+                                      width: 200,
+                                      height: 40)
+                                ],
+                              ));
+                        },
+                        child: Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              image: DecorationImage(
+                                  image: NetworkImage(user.photo!),
+                                  fit: BoxFit.cover),
+                              border: Border.all(
+                                  width: 2,
+                                  color: Theme.of(context).iconTheme.color!)),
+                        ),
+                      ),
+                      const Width5()
+                    ],
+                    GestureDetector(
+                      onTap: () {
+                        if (user != null && user.email != null) {
+                          context.read<NoteBloc>().add(const NoteSync());
+                        } else {
+                          showAppDialog(
+                              context: context,
+                              height: 200,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SecondaryButton(
+                                      onPressed: () async {
+                                        context
+                                            .read<AuthBloc>()
+                                            .add(AuthSignIn(context));
+                                        context
+                                            .read<NoteBloc>()
+                                            .add(const NoteSync());
+                                        Navigator.pop(context);
+                                      },
+                                      icon: SvgPicture.asset(
+                                        AppVector.google,
+                                        width: 25,
+                                        height: 25,
+                                      ),
+                                      label: 'Continue with google',
+                                      width: 200,
+                                      height: 40)
+                                ],
+                              ));
+                        }
+                      },
+                      child: Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                  width: 2,
+                                  color: Theme.of(context).iconTheme.color!)),
+                          child: statusWidget(syncStatus)),
+                    ),
+                    const Width5(),
                     GestureDetector(
                       onTap: () {
                         context.read<AppDataBloc>().add(const NoteLayoutChanged(
@@ -133,8 +264,11 @@ class NoteView extends StatelessWidget {
                           },
                           itemCount: notes.length)
                       : ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemBuilder: (_, index) {
-                            return Container();
+                            final note = notes[index];
+                            return ColumnNoteCard(
+                                key: Key(note.toString()), note: note);
                           },
                           separatorBuilder: (_, index) {
                             return const Height10();
